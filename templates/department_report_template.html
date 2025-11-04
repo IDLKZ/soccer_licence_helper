@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Отчет для Комиссии по лицензированию футбольных клубов</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            font-size: 14px;
+            line-height: 1.4;
+            color: #000;
+            margin: 40px;
+            background: white;
+        }
+
+        .document-container {
+            max-width: 210mm;
+            margin: 0 auto;
+        }
+
+        .header {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            text-align: center;
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+        .sign {
+            width: 120px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            text-align: center;
+            position: absolute;
+            top: -12mm;
+            right: 80mm;
+          }
+        h1 {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 0;
+            line-height: 1.3;
+        }
+
+        .info-section {
+            margin-bottom: 25px;
+        }
+
+        .info-row {
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .info-label {
+            font-weight: bold;
+            display: inline;
+        }
+
+        .info-value {
+            display: inline;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            margin: 30px 0 20px 0;
+            text-decoration: underline;
+        }
+
+        .activity-item {
+            margin-bottom: 25px;
+        }
+
+        .activity-meta {
+            margin-bottom: 8px;
+        }
+
+        .activity-meta p {
+            margin: 3px 0;
+            line-height: 1.4;
+        }
+
+        .activity-label {
+            font-weight: bold;
+            display: inline;
+        }
+
+        .activity-value {
+            display: inline;
+        }
+
+        .results-text {
+            margin: 8px 0;
+            line-height: 1.4;
+        }
+
+        .criteria-item {
+            margin: 3px 0;
+            font-style: italic;
+            line-height: 1.4;
+        }
+
+        .signature-section {
+            position: relative;
+            margin-top: 40px;
+            text-align: left;
+        }
+
+        .signature-line {
+            font-weight: bold;
+        }
+
+        @media print {
+            body {
+                margin: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="document-container">
+        <div class="header">
+            <h1>ОТЧЕТ<br>для Комиссии по лицензированию футбольных клубов</h1>
+            <img class="logo" src="data:image/png;base64,{{ logo_base64 }}" alt="Логотип">
+        </div>
+
+        <div class="info-section">
+            <div class="info-row">
+                <span class="info-label">Кому:</span> <span class="info-value">Комиссии по лицензированию футбольных клубов</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">От кого:</span> <span class="info-value">Директора Департамента лицензирования Е.Т. Мусабеков</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Дата:</span> <span class="info-value">{{ date }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Заявитель:</span> <span class="info-value">{{ club }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Мероприятие:</span> <span class="info-value">Проверка на соответствие требованиям законодательства РК и стандартам КФФ, анализ представленных {{ club }} (далее по тексту - Клуб) в Департамент лицензирования КФФ документов, подтверждающих выполнение критериев, согласно «Правил по лицензированию футбольных клубов РК для участия в турнирах, организуемых КФФ» (далее по тексту - «Правила»).</span>
+            </div>
+        </div>
+
+        <div class="section-title">Выполненные мероприятия:</div>
+
+        {% for report in reports %}
+            <div class="activity-item">
+            <div class="activity-meta">
+                <p><span class="activity-label">Дата:</span> <span class="activity-value">{{ report.date }}</span></p>
+                <p><span class="activity-label">Исполнитель:</span> <span class="activity-value">{{ report.expert }}</span></p>
+                <p class="results-text"><span class="activity-label">Результаты:</span> в результате проведенного анализа документов, подтверждающих выполнение требований правовых критериев, согласно Правил, <strong>установлено следующее:</strong></p>
+            </div>
+            {% for document in report.documents %}
+                <div class="criteria-item"><em>{{ document.values()|first }}</em></div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+        <div class="signature-section">
+            <div class="signature-line">Директор Департамента лицензирования &nbsp;&nbsp;&nbsp;_________________ &nbsp;&nbsp;&nbsp;</div>
+            <img class="sign" src="data:image/png;base64,{{ sign_img }}" alt="Sign">
+        </div>
+    </div>
+</body>
+</html>

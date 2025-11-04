@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Решение комиссии по лицензированию футбольных клубов</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            font-size: 14px;
+            line-height: 1.4;
+            color: #000;
+            margin: 40px;
+            background: white;
+        }
+
+        .document-container {
+            max-width: 210mm;
+            margin: 0 auto;
+        }
+
+        .header {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            text-align: center;
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 0;
+            line-height: 1.3;
+        }
+
+        .info-section {
+            margin-bottom: 25px;
+        }
+
+        .info-row {
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .info-label {
+            font-weight: bold;
+            display: inline;
+        }
+
+        .info-value {
+            display: inline;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: bold;
+            text-align: start;
+            margin: 30px 0 20px 0;
+            text-decoration: underline;
+        }
+
+        .activity-item {
+            margin-bottom: 25px;
+        }
+
+        .activity-meta {
+            margin-bottom: 8px;
+        }
+
+        .activity-meta p {
+            margin: 3px 0;
+            line-height: 1.4;
+        }
+
+        .activity-label {
+            font-weight: bold;
+            display: inline;
+        }
+
+        .activity-value {
+            display: inline;
+        }
+
+        .results-text {
+            margin: 8px 0;
+            line-height: 1.4;
+        }
+
+        .criteria-item {
+            margin: 3px 0;
+            font-style: italic;
+            line-height: 1.4;
+        }
+
+        .signature-section {
+            margin-top: 40px;
+            text-align: left;
+        }
+
+        .signature-line {
+            font-weight: bold;
+        }
+
+        @media print {
+            body {
+                margin: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="document-container">
+        <!-- Document header with number and issue info -->
+<!--        <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">-->
+<!--            <tr>-->
+<!--                <td style="border: 1px solid black; padding: 5px; font-size: 12px; text-align: center;">Исх. № {{ document_number }}</td>-->
+<!--                <td style="border: 1px solid black; padding: 5px; font-size: 12px; text-align: center;">Выпуск № {{ issue_number }}</td>-->
+<!--                <td style="border: 1px solid black; padding: 5px; font-size: 12px; text-align: center;">Дата выпуска: {{ issue_date }}</td>-->
+<!--            </tr>-->
+<!--        </table>-->
+
+<!--        <div style="text-align: center; font-size: 11px; margin-bottom: 5px;">-->
+<!--            Казахстанская футбольная федерация<br>-->
+<!--            Футбольное клубное лицензирование комиссия-->
+<!--        </div>-->
+
+        <div class="header">
+            <h1>РЕШЕНИЕ<br>Комиссии по лицензированию футбольных клубов<br>Казахстанской федерации футбола</h1>
+            <img class="logo" src="data:image/png;base64,{{ logo_base64 }}" alt="Логотип">
+        </div>
+
+        <div class="info-section">
+            <div class="info-row">
+                <span class="info-label">Дата заседания:</span> <span class="info-value">{{ meeting_date }}г.</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Место проведения заседания:</span> <span class="info-value">{{ meeting_place }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Директивный орган:</span> <span class="info-value">{{ department_name }}</span>
+            </div>
+        </div>
+
+        <div class="section-title">В составе членов:</div>
+        <div class="activity-meta">
+            <p>{{control_position}} - <b>{{ control_name }}</b></p>
+        </div>
+        {% for expert in experts %}
+            <div class="activity-meta">
+                <p>{{expert}}</p>
+            </div>
+        {% endfor %}
+
+        <div class="activity-meta" style="margin: 15px 0 15px 0;">
+            <span class="info-label">Футбольный клуб: </span> {{ club_fullname }}
+        </div>
+
+        <div class="activity-meta">
+            <p style="text-indent: 20px;">{{summary}}</p>
+        </div>
+
+        <div class="section-title" style="text-align: center; margin: 30px 0 20px 0;">УСТАНОВИЛА:</div>
+
+        {% for criterion in criteria %}
+            <div class="activity-meta">
+                <p><b><u>{{criterion.title}}</u>:</b> {{criterion.description}}</p>
+            </div>
+        {% endfor %}
+
+        {% if documents %}
+            <div class="activity-meta">
+                <p style="text-indent: 20px; margin: 25px 0; font-size: 16px">По итогам представленных на рассмотрение КЛФК документов выявлено следующее:</p>
+            </div>
+            {% for document in documents %}
+                <div class="activity-meta" style="margin-left: 0px;">
+                    <p>{{ document.letter }} несоответствия по разделу <b><u>«{{ document.title }}»</u>:</b></p>
+                    {% for doc in document.docs %}
+                        <p style="margin-left: 20px;">• <b>{{ doc.title }}</b>.</p>
+                        <p style="text-indent: 20px;">{{ doc.comment }}. <b><i>{{ doc.deadline }}</i></b></p>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="section-title" style="text-align: center; margin: 30px 0 20px 0; font-weight: bold;">
+            В связи с этим, Комиссия по лицензированию приняла следующее<br><br>РЕШЕНИЕ:
+        </div>
+
+        <div class="activity-meta">
+            {% for key, text in conclusion.items() %}
+                <p>{{ key }}. {{ text|safe }}</p>
+            {% endfor %}
+        </div>
+
+        <div class="signature-section">
+            <div class="signature-line">{{ control_position }} &nbsp;&nbsp;&nbsp;_________________ &nbsp;&nbsp;&nbsp;{{ control_name }}</div>
+        </div>
+        
+        <div class="signature-section">
+            <div class="signature-line">Секретарь &nbsp;&nbsp;&nbsp;_________________ &nbsp;&nbsp;&nbsp;{{ secretary_name }}</div>
+        </div>
+
+        <p>
+            Подписано {{ control_name }}, дата: {{ meeting_date }}г.
+        </p>
+    </div>
+</body>
+</html>

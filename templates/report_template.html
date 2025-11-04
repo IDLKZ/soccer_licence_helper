@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Отчет о рассмотрении заявки клуба</title>
+    <style>
+        body {
+            font-family: DejaVu Sans, sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #000;
+            margin: 40px;
+        }
+        .report-header {
+            text-align: right;
+            margin-bottom: 10px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 20px;
+            text-transform: uppercase;
+            margin: 0 auto;
+        }
+        .logo {
+            width: 100px; /* ширина логотипа */
+            height: auto;
+        }
+        .header-section {
+            margin-bottom: 20px;
+        }
+        .header-section p {
+            margin: 5px 0;
+        }
+        h2 {
+            font-size: 16px;
+            margin-top: 30px;
+            text-transform: uppercase;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 6px 8px;
+            vertical-align: top;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .summary {
+            margin-top: 30px;
+        }
+        .w-30 {
+            width: 30px;
+        }
+        .w-80 {
+            width: 80px;
+        }
+        .w-140 {
+            width: 140px;
+        }
+        .w-250 {
+            width: 250px;
+        }
+    </style>
+</head>
+<body>
+    <div class="report-header">
+        <img class="logo" src="data:image/png;base64,{{ logo_base64 }}" alt="Логотип">
+    </div>
+    <h1>ОТЧЕТ О РАССМОТРЕНИИ ЗАЯВКИ КЛУБА</h1>
+
+    <div class="header-section">
+        <p><strong>КОМУ:</strong> Директору Департамента лицензирования Е.Т. Мусабекову</p>
+        <p><strong>ОТ КОГО:</strong> {{ expert }}</p>
+        <p><strong>ДАТА:</strong> {{ date }}</p>
+        <p><strong>ЗАЯВИТЕЛЬ:</strong> {{ club }}</p>
+    </div>
+
+    <h2>РАССМОТРЕННЫЕ ДОКУМЕНТЫ</h2>
+    <table>
+        <thead>
+            <tr>
+                <th class="w-30">№ п/п</th>
+                <th class="w-250">СТАТЬЯ</th>
+<!--                <th>ДОКУМЕНТ</th>-->
+                <th class="w-80">СТАТУС</th>
+                <th>ПРИМЕЧАНИЯ</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for article in articles %}
+            <!-- Первая строка: индекс + заголовок статьи -->
+            <tr>
+                <td class="w-30" rowspan="{{ article.documents|length + 1 }}">{{ loop.index }}</td>
+                <td class="w-250" colspan="4"><strong>{{ article.title }}</strong></td>
+            </tr>
+
+            <!-- Строки документов -->
+            {% for doc in article.documents %}
+            <tr>
+                <td>{{ doc.name }}</td>
+                <td class="w-80">{{ doc.status }}</td>
+                <td>{{ doc.note }}</td>
+            </tr>
+            {% endfor %}
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="summary">
+        <h2>ОСНОВНЫЕ ВЫВОДЫ</h2>
+        <p>{{ summary }}</p>
+        {% for article in articles %}
+            <p><b>{{ article.title }};</b></p>
+        {% endfor %}
+
+        {% if status %}
+            <p>критерий выполнен</p>
+        {% endif %}
+    </div>
+
+    <p>Подписано {{ signed_by }}, дата: {{ signed_date }}</p>
+</body>
+</html>
