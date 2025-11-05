@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @page { size: A4; margin: 0; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 210mm;
+    height: 297mm;
+  }
+
+  .page {
+    width: 210mm;
+    height: 297mm;
+    background-image: url("data:image/png;base64,{{ bg_image_en }}");
+    background-repeat: no-repeat;
+    background-size: 210mm 297mm;
+    background-position: 0 0;
+    page-break-after: always;
+    position: relative;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  .content {
+    position: absolute;
+    left: 60mm;
+    right: 18mm;
+    top: 105mm;
+    font-size: 5mm;
+    line-height: 1.45;
+  }
+
+  .footer { margin-top: 12mm; font-size: 4.2mm; position: relative }
+  .underline {
+    display: inline-block;
+    min-width: 12mm;
+    border-bottom: 0.25mm solid #000;
+    line-height: 1.1;
+    padding: 0 2mm 0.5mm 2mm;
+    text-align: center;
+  }
+  .date-box { white-space: nowrap; }
+  .date-quote { font-weight: 700; }
+
+  .sign {
+    width: 120px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+    text-align: center;
+    position: absolute;
+    top: -12mm;
+    right: 52mm;
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="content">
+    <p>Issued by: <b>&laquo;{{ club_full_name_en }}&raquo;</b></p>
+    <p>BIN: <b>{{ club_bin }}</b><br> to participate in UEFA club tournaments</p>
+    <p><b>Special conditions of validity of the License:</b><br>
+       The certificate is inalienable and cannot be transferred to another legal entity</p>
+    <p><b>License Validity period:</b><br>During the {{ license_end_at }}</p>
+    <p><b>The authority that issued the License:</b><br>
+       Association of legal entities &laquo;Association &laquo;Kazakhstan Football Federation&raquo;&raquo;</p>
+
+    <div class="footer">
+      <p><b>Managing director</b><img class="sign" src="data:image/png;base64,{{ sign_img }}" alt="Sign"> </p>
+      <p class="date-box">
+        Date of issue of the License:
+        <span class="date-quote">&laquo;</span>
+        <span class="underline">{{ solution_day }}</span>
+        <span class="date-quote">&raquo;</span>
+        <span class="underline">{{ solution_month }}</span>
+        {{ solution_year }}
+      </p>
+      <p>License number № <span class="underline">{{ certificate_id }}</span><br>Astana city</p>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

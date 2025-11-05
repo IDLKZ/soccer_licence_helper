@@ -12,6 +12,7 @@ from app.core.database import get_db
 from app.application.use_cases.generate_report_use_case_v2 import GenerateReportUseCaseV2
 from app.application.use_cases.generate_solution_use_case import GenerateSolutionUseCase
 from app.application.use_cases.generate_department_report_use_case import GenerateDepartmentReportUseCase
+from app.application.use_cases.generate_certificate_use_case import GenerateCertificateUseCase
 from app.domain.services.template_renderer import ITemplateRenderer
 from app.domain.services.pdf_generator import IPDFGenerator
 from app.infrastructure.services.jinja2_template_renderer import Jinja2TemplateRenderer
@@ -90,6 +91,17 @@ def load_logo_base64() -> str:
         return base64.b64encode(img_file.read()).decode("utf-8")
 
 
+# Certificate Use Case dependency
+def get_generate_certificate_use_case(
+    db: DatabaseSession
+) -> GenerateCertificateUseCase:
+    """Получить Use Case для генерации сертификата"""
+    return GenerateCertificateUseCase(db)
+
+
+GenerateCertificateUseCaseDep = Annotated[GenerateCertificateUseCase, Depends(get_generate_certificate_use_case)]
+
+
 # Sign image loader helper
 def load_sign_img_base64() -> str:
     """Загрузить изображение подписи в формате base64"""
@@ -101,4 +113,29 @@ def load_sign_img_base64() -> str:
         return ""
 
     with open(sign_path, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode("utf-8")
+
+
+# Background certificate images loaders
+def load_bg_certificate_en() -> str:
+    """Загрузить фон для английского сертификата в формате base64"""
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+    bg_path = os.path.join(base_dir, "templates", "bg_certificate_en.png")
+
+    if not os.path.exists(bg_path):
+        return ""
+
+    with open(bg_path, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode("utf-8")
+
+
+def load_bg_certificate_kk() -> str:
+    """Загрузить фон для казахского сертификата в формате base64"""
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+    bg_path = os.path.join(base_dir, "templates", "bg_certificate_kk.png")
+
+    if not os.path.exists(bg_path):
+        return ""
+
+    with open(bg_path, "rb") as img_file:
         return base64.b64encode(img_file.read()).decode("utf-8")
