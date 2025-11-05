@@ -192,14 +192,15 @@ class GenerateSolutionUseCase:
         return result.scalar_one_or_none()
 
     async def _get_application_criteria(self, application_id: int) -> ApplicationCriteriaModel | None:
-        """Получить критерии заявки"""
+        """Получить критерии заявки (первую запись)"""
         query = (
             select(ApplicationCriteriaModel)
             .where(ApplicationCriteriaModel.application_id == application_id)
+            .limit(1)
         )
 
         result = await self.db.execute(query)
-        return result.scalar_one_or_none()
+        return result.scalars().first()
 
     async def build_criteria(
         self,
