@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Направление на рассмотрение экспертам документов Футбольных клубов</title>
+    <style>
+        body {
+            font-family: DejaVu Sans, sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #000;
+            margin: 40px;
+        }
+        .report-header {
+            text-align: right;
+            margin-bottom: 10px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 20px;
+            text-transform: uppercase;
+            margin: 0 auto;
+        }
+        .logo {
+            width: 100px; /* ширина логотипа */
+            height: auto;
+        }
+        .header-section {
+            margin-bottom: 20px;
+        }
+        .header-section p {
+            margin: 5px 0;
+        }
+        h2 {
+            font-size: 16px;
+            margin-top: 30px;
+            text-transform: uppercase;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 6px 8px;
+            vertical-align: top;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .summary {
+            margin-top: 30px;
+        }
+        .w-30 {
+            width: 30px;
+        }
+        .w-80 {
+            width: 80px;
+        }
+        .w-140 {
+            width: 140px;
+        }
+        .w-250 {
+            width: 250px;
+        }
+    </style>
+</head>
+<body>
+    <div class="report-header">
+        <img class="logo" src="data:image/png;base64,{{ logo_base64 }}" alt="Логотип">
+    </div>
+    <h1>Направление на рассмотрение экспертам <br> документов Футбольных клубов</h1>
+
+    <!-- Первая таблица: Материалы заявки -->
+    <table>
+        <thead>
+            <tr>
+                <th colspan="2" style="text-align: center;"><strong>МАТЕРИАЛЫ ЗАЯВКИ КЛУБА НА РАССМОТРЕНИЕ</strong></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="width: 25%;"><strong>КОМУ</strong></td>
+                <td style="width: 75%;">{{ expert }}</td>
+            </tr>
+            <tr>
+                <td><strong>ОТ КОГО</strong></td>
+                <td>Директора департамента лицензирования - {{ director }}</td>
+            </tr>
+            <tr>
+                <td><strong>ДАТА</strong></td>
+                <td>{{ date }}</td>
+            </tr>
+            <tr>
+                <td><strong>ЗАЯВИТЕЛЬ</strong></td>
+                <td>{{ club }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Вторая таблица: Документы на рассмотрение -->
+    <table style="margin-top: 30px;">
+        <thead>
+            <tr>
+                <th colspan="4" style="text-align: center;"><strong>ДОКУМЕНТЫ НА РАССМОТРЕНИЕ</strong></th>
+            </tr>
+            <tr>
+                <th style="width: 7%;"><strong>№</strong></th>
+                <th style="width: 47%; text-align: center"><strong>НАИМЕНОВАНИЕ ДОКУМЕНТА</strong></th>
+                <th style="width: 22%; text-align: center"><strong>ДАТА ПОДАЧИ ДОКУМЕНТА</strong></th>
+                <th style="width: 24%; text-align: center"><strong>ПРИМЕЧАНИЯ</strong></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for doc in documents %}
+            <tr>
+                <td style="text-align: center;">{{ doc.number }}</td>
+                <td>{{ doc.name }}</td>
+                <td style="text-align: center;">{{ doc.submission_date }}</td>
+                <td>{{ doc.notes }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

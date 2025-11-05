@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.application.use_cases.generate_report_use_case_v2 import GenerateReportUseCaseV2
+from app.application.use_cases.generate_initial_report_use_case import GenerateInitialReportUseCase
 from app.application.use_cases.generate_solution_use_case import GenerateSolutionUseCase
 from app.application.use_cases.generate_department_report_use_case import GenerateDepartmentReportUseCase
 from app.application.use_cases.generate_certificate_use_case import GenerateCertificateUseCase
@@ -53,6 +54,17 @@ def get_generate_report_use_case(
 
 
 GenerateReportUseCaseDep = Annotated[GenerateReportUseCaseV2, Depends(get_generate_report_use_case)]
+
+
+# Initial Report Use Case dependency
+def get_generate_initial_report_use_case(
+    db: DatabaseSession
+) -> GenerateInitialReportUseCase:
+    """Получить Use Case для генерации начального отчета"""
+    return GenerateInitialReportUseCase(db)
+
+
+GenerateInitialReportUseCaseDep = Annotated[GenerateInitialReportUseCase, Depends(get_generate_initial_report_use_case)]
 
 
 # Solution Use Case dependency
