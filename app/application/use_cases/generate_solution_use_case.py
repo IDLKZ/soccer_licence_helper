@@ -186,10 +186,12 @@ class GenerateSolutionUseCase:
                 ApplicationStepModel.status_id == APPLICATION_STEP_CONTROL_STATUS_ID
             )
             .options(selectinload(ApplicationStepModel.responsible))
+            .order_by(ApplicationStepModel.created_at.desc())  # Берем самый свежий
+            .limit(1)  # Ограничиваем до одной записи
         )
 
         result = await self.db.execute(query)
-        return result.scalar_one_or_none()
+        return result.scalars().first()
 
     async def _get_application_criteria(self, application_id: int) -> ApplicationCriteriaModel | None:
         """Получить критерии заявки (первую запись)"""
@@ -386,10 +388,11 @@ class GenerateSolutionUseCase:
                 ApplicationCriteriaModel.application_id == application_id
             )
             .options(selectinload(ApplicationCriteriaModel.category))
+            .limit(1)  # Добавляем ограничение, чтобы избежать множественных записей
         )
 
         result = await self.db.execute(query)
-        return result.scalar_one_or_none()
+        return result.scalars().first()
 
     def _get_user_full_name(self, user) -> str:
         """Получить полное имя пользователя"""

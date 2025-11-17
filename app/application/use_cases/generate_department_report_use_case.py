@@ -172,6 +172,7 @@ class GenerateDepartmentReportUseCase:
         result = []
 
         for report in reports:
+
             # Получаем эксперта
             expert = await self._get_user(report.criteria.checked_by_id)
 
@@ -183,12 +184,13 @@ class GenerateDepartmentReportUseCase:
             added_doc_ids = set()
 
             category_id = report.criteria.category_id
+
             for doc in docs_by_category.get(category_id, []):
                 doc_id_str = str(doc.document_id)
 
                 # Проверяем, был ли документ уже добавлен (убираем дубли)
                 if doc_id_str not in added_doc_ids:
-                    status_value = "критерий выполнен;" if report.status else "критерий выполнен частично;"
+                    status_value = "критерий выполнен;" if doc.is_industry_passed else f"критерий выполнен частично; ({doc.industry_comment})"
                     added_doc_ids.add(doc_id_str)
 
                     # Формат: {document_id: "title - статус"}

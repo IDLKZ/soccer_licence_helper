@@ -114,7 +114,33 @@
         .signature-line {
             font-weight: bold;
         }
-
+ .w-80 {
+            width: 80px;
+        }
+        .w-250 {
+            width: 250px;
+        }
+        .text-center {
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 6px 8px;
+            vertical-align: top;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .dvh-20 {
+            margin: 20px 0;
+        }
         @media print {
             body {
                 margin: 20px;
@@ -124,19 +150,17 @@
 </head>
 <body>
     <div class="document-container">
-        <!-- Document header with number and issue info -->
-<!--        <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">-->
-<!--            <tr>-->
-<!--                <td style="border: 1px solid black; padding: 5px; font-size: 12px; text-align: center;">Исх. № {{ document_number }}</td>-->
-<!--                <td style="border: 1px solid black; padding: 5px; font-size: 12px; text-align: center;">Выпуск № {{ issue_number }}</td>-->
-<!--                <td style="border: 1px solid black; padding: 5px; font-size: 12px; text-align: center;">Дата выпуска: {{ issue_date }}</td>-->
-<!--            </tr>-->
-<!--        </table>-->
+        <table>
+            <thead>
+            <tr>
+                <td class="w-250"><strong>Ид. № <u>DCP.01.7/</u></strong></td>
+                <td class="w-80 text-center"><strong>Выпуск №3</strong></td>
+                <td class="w-250 text-center"><strong>Дата выпуска: 09 января 2023 г.</strong></td>
+            </tr>
+            </thead>
+        </table>
 
-<!--        <div style="text-align: center; font-size: 11px; margin-bottom: 5px;">-->
-<!--            Казахстанская футбольная федерация<br>-->
-<!--            Футбольное клубное лицензирование комиссия-->
-<!--        </div>-->
+        <div class="dvh-20"></div>
 
         <div class="header">
             <h1>РЕШЕНИЕ<br>Комиссии по лицензированию футбольных клубов<br>Казахстанской федерации футбола</h1>

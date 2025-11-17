@@ -168,11 +168,11 @@ class GenerateReportUseCaseV2:
     ) -> List[ArticleDTO]:
         """Построить articles из документов"""
         # Фильтрация документов в зависимости от report_status
-        if report_status == 1:
-            filtered_docs = [doc for doc in application_documents if doc.is_industry_passed]
-        else:
-            filtered_docs = application_documents
-
+        # if report_status == 1:
+        #     filtered_docs = [doc for doc in application_documents if doc.is_industry_passed]
+        # else:
+        #     filtered_docs = application_documents
+        filtered_docs = application_documents
         # Группировка по document_id
         grouped = {}
         for doc in filtered_docs:
