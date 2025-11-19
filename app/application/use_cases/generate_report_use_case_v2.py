@@ -112,7 +112,7 @@ class GenerateReportUseCaseV2:
             summary=summary,
             signed_by=criteria.checked_by if criteria.checked_by else None,
             signed_date=report.created_at.strftime("%d.%m.%Y"),
-            status=self._calculate_overall_status(application_documents, report.status),
+            status=self._calculate_overall_status(application_documents),
             logo_base64=logo_base64
         )
 
@@ -249,16 +249,19 @@ class GenerateReportUseCaseV2:
 
     def _calculate_overall_status(
         self,
-        application_documents: List[ApplicationDocumentModel],
-        report_status: int
+        application_documents: List[ApplicationDocumentModel]
     ) -> bool:
         """Вычислить общий статус"""
-        if report_status == 1:
-            statuses = [doc.is_industry_passed for doc in application_documents if doc.is_industry_passed]
-        else:
-            statuses = [doc.is_industry_passed for doc in application_documents]
+        statuses = [doc.is_industry_passed for doc in application_documents]
 
-        return all(statuses) if statuses else False
+        if all(statuses):
+            result = 1
+        elif any(statuses):
+            result = 0
+        else:
+            result = -1
+
+        return result
 
     def _build_director_string(self, criteria: ApplicationCriteriaModel) -> str:
         """Построить строку с информацией о директоре"""

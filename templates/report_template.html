@@ -131,8 +131,12 @@
             <p><b>{{ article.title }};</b></p>
         {% endfor %}
 
-        {% if status %}
+        {% if status == 1 %}
             <p>критерий выполнен</p>
+        {% elif status == 0 %}
+            <p>критерий выполнен частично</p>
+        {% elif status == -1 %}
+            <p>критерий не выполнен</p>
         {% endif %}
     </div>
 
