@@ -56,14 +56,11 @@ class GenerateDepartmentReportUseCase:
         # Получаем все отчеты для данной заявки со статусом 1 и criteria_id не null
         reports = await self._get_application_reports(application_id)
 
-        # Получаем все документы заявки
-        application_documents = await self._get_application_documents(application_id)
-
         # Получаем пользователя департамента (из первого документа с first_checked_by_id)
-        department_user = await self._get_department_user(application_documents)
+        department_user = await self._get_department_user(application_id)
 
         # Строим список отчетов
-        reports_data = await self.build_reports(reports, application_documents)
+        reports_data = await self.build_reports(reports, application_id)
 
         # Формируем DTO
         department_report_data = DepartmentReportDataDTO(
@@ -139,14 +136,50 @@ class GenerateDepartmentReportUseCase:
         result = await self.db.execute(query)
         return list(result.scalars().all())
 
-    async def _get_department_user(self, documents: List[ApplicationDocumentModel]) -> UserModel | None:
-        """Получить пользователя департамента из документов"""
-        # Ищем первый документ с first_checked_by_id
-        for doc in documents:
-            if doc.first_checked_by_id:
-                user = await self._get_user(doc.first_checked_by_id)
-                if user:
-                    return user
+    async def _get_documents_by_ids(self, document_ids: List[str], application_id: int) -> List[ApplicationDocumentModel]:
+        """Получить документы по списку ID документов"""
+        if not document_ids:
+            return []
+
+        # Преобразуем строковые ID в целые числа
+        int_ids = [int(doc_id) for doc_id in document_ids]
+
+        query = (
+            select(ApplicationDocumentModel)
+            .where(
+                and_(
+                    ApplicationDocumentModel.id.in_(int_ids),
+                    ApplicationDocumentModel.application_id == application_id
+                )
+            )
+            .options(
+                selectinload(ApplicationDocumentModel.document)
+            )
+        )
+
+        result = await self.db.execute(query)
+        return list(result.scalars().all())
+
+    async def _get_department_user(self, application_id: int) -> UserModel | None:
+        """Получить пользователя департамента из документов заявки"""
+        # Находим первый документ с first_checked_by_id
+        query = (
+            select(ApplicationDocumentModel)
+            .where(
+                and_(
+                    ApplicationDocumentModel.application_id == application_id,
+                    ApplicationDocumentModel.first_checked_by_id.is_not(None)
+                )
+            )
+            .limit(1)
+        )
+
+        result = await self.db.execute(query)
+        document = result.scalar_one_or_none()
+
+        if document and document.first_checked_by_id:
+            return await self._get_user(document.first_checked_by_id)
+
         return None
 
     async def _get_user(self, user_id: int) -> UserModel | None:
@@ -158,49 +191,49 @@ class GenerateDepartmentReportUseCase:
     async def build_reports(
         self,
         reports: List[ApplicationReportModel],
-        application_documents: List[ApplicationDocumentModel]
+        application_id: int
     ) -> List[DepartmentReportItemDTO]:
         """
         Построить список отчетов с документами
-        Группирует документы по отчетам (по category_id)
+        Для каждого отчета используется его list_documents
         """
-        # Индексация документов по category_id
-        docs_by_category: Dict[int, List[ApplicationDocumentModel]] = {}
-        for doc in application_documents:
-            docs_by_category.setdefault(doc.category_id, []).append(doc)
-
         result = []
 
         for report in reports:
-
             # Получаем эксперта
             expert = await self._get_user(report.criteria.checked_by_id)
 
             # Формируем позицию эксперта
             expert_position = self._get_expert_position(expert, report.criteria)
 
-            # Собираем документы для данного отчета
+            # Собираем документы для данного отчета из list_documents
             documents_list = []
-            added_doc_ids = set()
 
-            category_id = report.criteria.category_id
+            # Проверяем наличие list_documents в отчете
+            if report.list_documents:
+                # Получаем документы по ID из list_documents (это ID записей application_documents)
+                report_documents = await self._get_documents_by_ids(
+                    report.list_documents,
+                    application_id
+                )
 
-            for doc in docs_by_category.get(category_id, []):
-                doc_id_str = str(doc.document_id)
+                # Создаем словарь для быстрого доступа к документам по ID записи application_documents
+                docs_dict: Dict[int, ApplicationDocumentModel] = {
+                    doc.id: doc for doc in report_documents
+                }
 
-                # Проверяем, был ли документ уже добавлен (убираем дубли)
-                if doc_id_str not in added_doc_ids:
-                    status_value = "критерий выполнен;" if doc.is_industry_passed else f"критерий выполнен частично; ({doc.industry_comment})"
-                    added_doc_ids.add(doc_id_str)
+                # Обрабатываем документы в порядке list_documents
+                for doc_id_str in report.list_documents:
+                    doc_id = int(doc_id_str)
+                    doc = docs_dict.get(doc_id)
 
-                    # Формат: {document_id: "title - статус"}
-                    documents_list.append({
-                        doc_id_str: f"{doc.document.title_ru} - {status_value}"
-                    })
+                    if doc:
+                        status_value = "критерий выполнен;" if doc.is_industry_passed else f"критерий выполнен частично; ({doc.industry_comment})"
 
-            # Сортируем документы по ID
-            documents_list.sort(key=lambda d: int(list(d.keys())[0]))
-
+                        # Формат: {document_id: "title - статус"}
+                        documents_list.append({
+                            doc_id_str: f"{doc.document.title_ru} - {status_value}"
+                        })
             result.append(
                 DepartmentReportItemDTO(
                     date=report.created_at.strftime("%d.%m.%Y"),

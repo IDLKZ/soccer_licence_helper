@@ -2,7 +2,7 @@
 ApplicationReport SQLAlchemy Model
 ORM модель для отчетов по заявкам
 """
-from sqlalchemy import Integer, ForeignKey, String
+from sqlalchemy import Integer, ForeignKey, String, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.infrastructure.database.models.base import Base, TimestampMixin
 
@@ -24,6 +24,7 @@ class ApplicationReportModel(Base, TimestampMixin):
         nullable=False
     )
     status: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    list_documents: Mapped[list | None] = mapped_column(JSON, nullable=True)
     # file_url: Mapped[str | None] = mapped_column(String(500), nullable=True)  # Нет в БД
 
     # Relationships

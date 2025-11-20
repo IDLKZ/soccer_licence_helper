@@ -3,7 +3,7 @@ Generate Solution Use Case
 Use Case для генерации решения - работает со SQLAlchemy моделями напрямую
 """
 from typing import List, Dict
-from sqlalchemy import select
+from sqlalchemy import select, and_
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -20,12 +20,13 @@ from app.application.dto.solution_generation_dto import (
     SolutionArticleDTO,
     SolutionDocItemDTO,
 )
+from app.application.dto.report_generation_dto import CategoryExpertMapping
 
 # Константы статусов (можно вынести в отдельный файл)
-APPLICATION_STATUS_APPROVED_ID = 3  # Утвержден
-APPLICATION_STATUS_REJECTED_ID = 4  # Отклонен
-APPLICATION_STATUS_REVOKED_ID = 5   # Отозван
-APPLICATION_STEP_CONTROL_STATUS_ID = 5  # Контроль
+APPLICATION_STATUS_APPROVED_ID = 6  # Утвержден
+APPLICATION_STATUS_REJECTED_ID = 8  # Отклонен
+APPLICATION_STATUS_REVOKED_ID = 7   # Отозван
+APPLICATION_STEP_CONTROL_STATUS_ID = 4  # Контроль
 
 
 class GenerateSolutionUseCase:
@@ -33,6 +34,7 @@ class GenerateSolutionUseCase:
 
     def __init__(self, db: AsyncSession):
         self.db = db
+        self.expert_mapper = CategoryExpertMapping()
 
     async def execute(self, solution_id: int, logo_base64: str) -> SolutionDataDTO:
         """
@@ -73,8 +75,14 @@ class GenerateSolutionUseCase:
         if not season:
             raise ValueError(f"Season not found for license {license_entity.id}")
 
-        # Получаем документы заявки
-        application_documents = await self._get_documents(application.id)
+        # Получаем документы из list_documents решения
+        if solution.list_documents:
+            application_documents = await self._get_documents_by_ids(
+                solution.list_documents,
+                application.id
+            )
+        else:
+            application_documents = []
 
         # Получаем шаг контроля
         control_step = await self._get_control_step(application.id)
@@ -102,7 +110,7 @@ class GenerateSolutionUseCase:
             season=season.title_ru,
             license=license_entity.title_ru,
             cancel_reason=control_step.result if control_step else "",
-            application_status_id=application_status_id
+            application_status_id=application.category_id
         )
 
         # Формируем DTO
@@ -177,13 +185,39 @@ class GenerateSolutionUseCase:
         result = await self.db.execute(query)
         return list(result.scalars().all())
 
+    async def _get_documents_by_ids(
+        self,
+        document_ids: List[str],
+        application_id: int
+    ) -> List[ApplicationDocumentModel]:
+        """Получить документы по списку ID записей application_documents"""
+        if not document_ids:
+            return []
+
+        # Преобразуем строковые ID в целые числа
+        int_ids = [int(doc_id) for doc_id in document_ids]
+
+        query = (
+            select(ApplicationDocumentModel)
+            .where(
+                and_(
+                    ApplicationDocumentModel.id.in_(int_ids),
+                    ApplicationDocumentModel.application_id == application_id
+                )
+            )
+            .options(selectinload(ApplicationDocumentModel.category))
+        )
+
+        result = await self.db.execute(query)
+        return list(result.scalars().all())
+
     async def _get_control_step(self, application_id: int) -> ApplicationStepModel | None:
         """Получить шаг контроля (status_id = 5)"""
         query = (
             select(ApplicationStepModel)
             .where(
                 ApplicationStepModel.application_id == application_id,
-                ApplicationStepModel.status_id == APPLICATION_STEP_CONTROL_STATUS_ID
+                ApplicationStepModel.status_id.in_([9, 10, 11, 12])
             )
             .options(selectinload(ApplicationStepModel.responsible))
             .order_by(ApplicationStepModel.created_at.desc())  # Берем самый свежий
@@ -230,7 +264,7 @@ class GenerateSolutionUseCase:
             )
 
             # Считаем, что control_comment => требование не выполнено
-            if doc.control_comment and application_status_id != APPLICATION_STATUS_APPROVED_ID:
+            if doc.is_final_passed is None:
                 group["failed_titles"].append(doc.title or "Документ")
 
         # Финальная сборка
@@ -281,7 +315,7 @@ class GenerateSolutionUseCase:
             )
 
             # control_comment => требование не выполнено
-            if doc.control_comment and application_status_id != APPLICATION_STATUS_APPROVED_ID:
+            if doc.is_final_passed is None:
                 deadline_str = (
                     f"Устранить несоответствие в срок до {doc.deadline.strftime('%d.%m.%Y')}"
                     if doc.deadline
@@ -291,7 +325,7 @@ class GenerateSolutionUseCase:
                 group["failed_docs"].append(
                     SolutionDocItemDTO(
                         title=doc.title or "Документ",
-                        comment=doc.control_comment,
+                        comment=doc.control_comment if doc.control_comment else doc.industry_comment,
                         deadline=deadline_str
                     )
                 )
@@ -313,19 +347,31 @@ class GenerateSolutionUseCase:
         application_documents: List[ApplicationDocumentModel],
         application_id: int
     ) -> List[str]:
-        """Построить список экспертов"""
+        """Построить список экспертов с использованием CategoryExpertMapping"""
         grouped = {}
 
         for doc in application_documents:
             # Получаем критерии для документа
             criteria = await self._get_criteria_for_category(doc.category_id, application_id)
-            if not criteria:
+            if not criteria or not criteria.checked_by:
                 continue
 
-            expert_key = criteria.checked_by  # группируем по имени эксперта
-            if expert_key and expert_key not in grouped:
-                # В БД только текстовое поле, нет объекта user
-                grouped[expert_key] = f"Эксперт - <b>{criteria.checked_by}</b>"
+            # Получаем категорию
+            category = doc.category
+            if not category:
+                continue
+
+            # Формируем ключ для группировки по категории
+            category_key = category.id
+
+            if category_key not in grouped:
+                # Используем маппер для определения должности эксперта
+                position = self.expert_mapper.get_position(
+                    category_value=category.value,
+                    user_full_name=criteria.checked_by,
+                    category_title_ru=category.title_ru
+                )
+                grouped[category_key] = f"<b>{position}</b>"
 
         return list(grouped.values())
 
@@ -348,13 +394,16 @@ class GenerateSolutionUseCase:
 
         if application_status_id == APPLICATION_STATUS_REVOKED_ID:
             return {
-                1: f"Отозвать лицензию у «{club}», организованного КФФ в сезоне «{season}» года."
+                1: f"Отозвать лицензию у «{club}», организованного КФФ в сезоне «{season}» года.",
+                1: f"«{club}» отказать в выдаче Лицензии на право участия в турнирах, организуемых КФФ в сезоне «{season}» г.г.",
+                2: f"Настоящее решение может быть обжаловано в Апелляционной комиссии по лицензированию футбольных клубов в порядке, определенном «Правилами по лицензированию футбольных клубов РК для участия в соревнованиях, организуемых КФФ»."
             }
 
         if not articles:
             # Случай 1 — нет нарушений
             return {
-                1: f"Выдать «{club}» Лицензию «{license}», организуемый КФФ в сезоне «{season}» года."
+                1: f"Выдать «{club}» Лицензию «{license}», организуемый КФФ в сезоне «{season}» года.",
+                2: f"Настоящее решение может быть обжаловано в Апелляционной комиссии по лицензированию футбольных клубов в порядке, определенном «Правилами по лицензированию футбольных клубов РК для участия в соревнованиях, организуемых КФФ»."
             }
 
         # Случай 2 — есть нарушения
@@ -373,6 +422,9 @@ class GenerateSolutionUseCase:
                 "Комиссией по лицензированию будут приняты <b>дополнительные дисциплинарные санкции "
                 "(штраф, снятие турнирных очков, отзыв Лицензии)</b> в соответствии Приложением III Правил по лицензированию."
             ),
+            4: (
+                "Настоящее решение может быть обжаловано в Апелляционной комиссии по лицензированию футбольных клубов в порядке, определенном «Правилами по лицензированию футбольных клубов РК для участия в соревнованиях, организуемых КФФ»."
+            )
         }
 
     async def _get_criteria_for_category(

@@ -3,7 +3,7 @@ ApplicationSolution SQLAlchemy Model
 ORM модель для решений по заявкам
 """
 from datetime import datetime, date
-from sqlalchemy import Integer, String, ForeignKey, Date, Text
+from sqlalchemy import Integer, String, ForeignKey, Date, Text, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.infrastructure.database.models.base import Base, TimestampMixin
 
@@ -28,6 +28,7 @@ class ApplicationSolutionModel(Base, TimestampMixin):
     meeting_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     meeting_place: Mapped[str | None] = mapped_column(Text, nullable=True)
     department_name: Mapped[str | None] = mapped_column(Text, nullable=True)
+    list_documents: Mapped[list | None] = mapped_column(JSON, nullable=True)
 
     # Relationships
     application: Mapped["ApplicationModel"] = relationship(

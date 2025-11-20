@@ -207,14 +207,15 @@
 
         {% if documents %}
             <div class="activity-meta">
-                <p style="text-indent: 20px; margin: 25px 0; font-size: 16px">По итогам представленных на рассмотрение КЛФК документов выявлено следующее:</p>
+                <p style="text-indent: 20px; margin: 25px 0; font-size: 14px"><strong>По итогам представленных на рассмотрение КЛФК документов выявлено следующее:</strong></p>
             </div>
             {% for document in documents %}
                 <div class="activity-meta" style="margin-left: 0px;">
                     <p>{{ document.letter }} несоответствия по разделу <b><u>«{{ document.title }}»</u>:</b></p>
                     {% for doc in document.docs %}
                         <p style="margin-left: 20px;">• <b>{{ doc.title }}</b>.</p>
-                        <p style="text-indent: 20px;">{{ doc.comment }}. <b><i>{{ doc.deadline }}</i></b></p>
+<!--                        <p style="text-indent: 20px;">{{ doc.comment }}. <b><i>{{ doc.deadline }}</i></b></p>-->
+                        <p style="text-indent: 20px;">{{ doc.comment }}</p>
                     {% endfor %}
                 </div>
             {% endfor %}
@@ -231,16 +232,18 @@
         </div>
 
         <div class="signature-section">
-            <div class="signature-line">{{ control_position }} &nbsp;&nbsp;&nbsp;_________________ &nbsp;&nbsp;&nbsp;{{ control_name }}</div>
+<!--            <div class="signature-line">{{ control_position }} &nbsp;&nbsp;&nbsp;_________________ &nbsp;&nbsp;&nbsp;{{ control_name }}</div>-->
+            <div class="signature-line">Председатель КЛФК &nbsp;&nbsp;&nbsp;_________________ &nbsp;&nbsp;&nbsp; А. Гусаров</div>
         </div>
         
         <div class="signature-section">
-            <div class="signature-line">Секретарь &nbsp;&nbsp;&nbsp;_________________ &nbsp;&nbsp;&nbsp;{{ secretary_name }}</div>
+<!--            <div class="signature-line">Секретарь &nbsp;&nbsp;&nbsp;_________________ &nbsp;&nbsp;&nbsp;{{ secretary_name }}</div>-->
+            <div class="signature-line">Секретарь &nbsp;&nbsp;&nbsp;_________________ &nbsp;&nbsp;&nbsp;С. Жугралин</div>
         </div>
 
-        <p>
-            Подписано {{ control_name }}, дата: {{ meeting_date }}г.
-        </p>
+<!--        <p>-->
+<!--            Подписано {{ control_name }}, дата: {{ meeting_date }}г.-->
+<!--        </p>-->
     </div>
 </body>
 </html>

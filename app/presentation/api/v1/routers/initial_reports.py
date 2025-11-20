@@ -12,7 +12,8 @@ from app.presentation.api.dependencies import (
     GenerateInitialReportUseCaseDep,
     TemplateRenderer,
     PDFGenerator,
-    load_logo_base64
+    load_logo_base64,
+    load_sign_img_base64
 )
 
 router = APIRouter(prefix="/initial-reports", tags=["initial-reports"])
@@ -45,11 +46,12 @@ async def generate_initial_report(
     try:
         # Загружаем логотип
         logo_base64 = load_logo_base64()
-
+        sign_img = load_sign_img_base64()
         # Выполняем Use Case для получения данных отчета
         report_data = await use_case.execute(
             report_id=request.report_id,
-            logo_base64=logo_base64
+            logo_base64=logo_base64,
+            sign_img=sign_img
         )
 
         # Преобразуем InitialReportDataDTO в словарь для шаблона
@@ -67,7 +69,8 @@ async def generate_initial_report(
                 }
                 for doc in report_data.documents
             ],
-            "logo_base64": logo_base64
+            "logo_base64": logo_base64,
+            "sign_img": sign_img
         }
 
         # Рендерим HTML шаблон

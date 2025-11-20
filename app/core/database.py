@@ -9,7 +9,7 @@ from app.core.config import settings
 # Создание async engine
 engine = create_async_engine(
     settings.database_url,
-    echo=settings.DEBUG,
+    echo=False,  # Отключено логирование SQL запросов
     pool_size=settings.DB_POOL_SIZE,
     max_overflow=settings.DB_MAX_OVERFLOW,
     pool_pre_ping=True,

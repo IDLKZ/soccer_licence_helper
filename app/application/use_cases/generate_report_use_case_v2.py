@@ -3,7 +3,7 @@ Generate Report Use Case V2
 Use Case для генерации отчета - работает со SQLAlchemy моделями напрямую
 """
 from typing import List
-from sqlalchemy import select
+from sqlalchemy import select, and_
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -80,14 +80,17 @@ class GenerateReportUseCaseV2:
         if not category:
             raise ValueError(f"Category not found for criteria {criteria.id}")
 
-        # Получаем документы
-        application_documents = await self._get_documents(
-            application_id=application.id,
-            category_id=category.id
-        )
+        # Получаем документы из list_documents отчета
+        if report.list_documents:
+            application_documents = await self._get_documents_by_ids(
+                report.list_documents,
+                application.id
+            )
+        else:
+            application_documents = []
 
         # Строим articles
-        articles = self._build_articles(application_documents, report.status)
+        articles = self._build_articles(application_documents, report.status, report.list_documents if report.list_documents else [])
 
         # Строим summary
         summary = self._build_summary(
@@ -161,19 +164,50 @@ class GenerateReportUseCaseV2:
         result = await self.db.execute(query)
         return list(result.scalars().all())
 
+    async def _get_documents_by_ids(
+        self,
+        document_ids: List[str],
+        application_id: int
+    ) -> List[ApplicationDocumentModel]:
+        """Получить документы по списку ID записей application_documents"""
+        if not document_ids:
+            return []
+
+        # Преобразуем строковые ID в целые числа
+        int_ids = [int(doc_id) for doc_id in document_ids]
+
+        query = (
+            select(ApplicationDocumentModel)
+            .where(
+                and_(
+                    ApplicationDocumentModel.id.in_(int_ids),
+                    ApplicationDocumentModel.application_id == application_id
+                )
+            )
+            .options(selectinload(ApplicationDocumentModel.document))
+        )
+
+        result = await self.db.execute(query)
+        return list(result.scalars().all())
+
     def _build_articles(
         self,
         application_documents: List[ApplicationDocumentModel],
-        report_status: int
+        report_status: int,
+        list_documents: List[str]
     ) -> List[ArticleDTO]:
-        """Построить articles из документов"""
+        """Построить articles из документов в порядке list_documents"""
         # Фильтрация документов в зависимости от report_status
         # if report_status == 1:
         #     filtered_docs = [doc for doc in application_documents if doc.is_industry_passed]
         # else:
         #     filtered_docs = application_documents
         filtered_docs = application_documents
-        # Группировка по document_id
+
+        # Создаем словарь по ID записи application_documents
+        docs_by_id = {doc.id: doc for doc in filtered_docs}
+
+        # Группировка по document_id для объединения документов с одним document_id
         grouped = {}
         for doc in filtered_docs:
             doc_id = doc.document_id
@@ -181,7 +215,8 @@ class GenerateReportUseCaseV2:
             if doc_id not in grouped:
                 grouped[doc_id] = {
                     "title": doc.document.title_ru if doc.document else "Документ",
-                    "documents": []
+                    "documents": [],
+                    "app_doc_ids": []  # Храним id записей application_documents
                 }
 
             # Определяем статус и примечание
@@ -200,16 +235,25 @@ class GenerateReportUseCaseV2:
                     note=note_value
                 )
             )
+            grouped[doc_id]["app_doc_ids"].append(doc.id)
 
-        # Сортировка по document_id
-        sorted_items = sorted(grouped.items(), key=lambda item: item[0])
-        articles = [
-            ArticleDTO(
-                title=item[1]["title"],
-                documents=item[1]["documents"]
-            )
-            for item in sorted_items
-        ]
+        # Сортировка по порядку в list_documents
+        # list_documents содержит ID записей application_documents
+        articles = []
+        added_doc_ids = set()  # Чтобы не добавлять дубли
+
+        for app_doc_id_str in list_documents:
+            app_doc_id = int(app_doc_id_str)
+            doc = docs_by_id.get(app_doc_id)
+
+            if doc and doc.document_id not in added_doc_ids:
+                added_doc_ids.add(doc.document_id)
+                articles.append(
+                    ArticleDTO(
+                        title=grouped[doc.document_id]["title"],
+                        documents=grouped[doc.document_id]["documents"]
+                    )
+                )
 
         return articles
 

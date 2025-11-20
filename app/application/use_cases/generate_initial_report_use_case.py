@@ -26,13 +26,14 @@ class GenerateInitialReportUseCase:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def execute(self, report_id: int, logo_base64: str) -> InitialReportDataDTO:
+    async def execute(self, report_id: int, logo_base64: str, sign_img: str) -> InitialReportDataDTO:
         """
         Выполнить генерацию данных начального отчета
 
         Args:
             report_id: ID начального отчета
             logo_base64: Логотип в формате base64
+            sign_img: Подпись ответственного
 
         Returns:
             InitialReportDataDTO с данными для шаблона
@@ -86,7 +87,8 @@ class GenerateInitialReportUseCase:
             director=director,
             date=date,
             club=club_name,
-            documents=documents
+            documents=documents,
+            sign_img=sign_img
         )
 
         return report_data

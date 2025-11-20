@@ -23,3 +23,4 @@ class InitialReportDataDTO:
     date: str  # Дата отчета
     club: str  # Заявитель
     documents: List[InitialReportDocumentDTO]  # Список документов
+    sign_img: str # Подпись
