@@ -8,6 +8,8 @@ from dataclasses import dataclass
 @dataclass
 class CertificateDataDTO:
     """DTO для данных сертификата"""
+    type_en: str
+    type_kk: str
     club_full_name_kk: str
     club_full_name_en: str
     club_bin: str

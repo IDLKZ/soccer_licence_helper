@@ -36,6 +36,11 @@ class SolutionDataDTO:
     department_name: str
     control_position: str
     control_name: str
+    director_name: str
+    director_position: str
+    secretary_position: str
+    secretary_name: str
+    type: str
     experts: List[str]
     club_fullname: str
     club_shortname: str
@@ -43,7 +48,6 @@ class SolutionDataDTO:
     season: str
     criteria: List[SolutionCriteriaDTO]
     documents: List[SolutionArticleDTO]
-    secretary_name: str
     summary: str
     conclusion: Dict[int, str]
     logo_base64: str

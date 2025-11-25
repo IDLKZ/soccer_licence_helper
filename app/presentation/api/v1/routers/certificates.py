@@ -64,6 +64,8 @@ async def generate_certificate(
 
         # Преобразуем CertificateDataDTO в словарь для шаблона
         context = {
+            "type_kk": certificate_data.type_kk,
+            "type_en": certificate_data.type_en,
             "club_full_name_kk": certificate_data.club_full_name_kk,
             "club_full_name_en": certificate_data.club_full_name_en,
             "club_bin": certificate_data.club_bin,

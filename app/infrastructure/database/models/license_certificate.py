@@ -2,7 +2,7 @@
 LicenseCertificate SQLAlchemy Model
 ORM модель для сертификатов лицензий
 """
-from sqlalchemy import Integer, ForeignKey
+from sqlalchemy import Integer, String, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.infrastructure.database.models.base import Base, TimestampMixin
 
@@ -28,6 +28,8 @@ class LicenseCertificateModel(Base, TimestampMixin):
         ForeignKey("clubs.id", ondelete="CASCADE"),
         nullable=False
     )
+    type_ru: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    type_kk: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     # Relationships
     application: Mapped["ApplicationModel"] = relationship(

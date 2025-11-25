@@ -190,7 +190,7 @@
         {% endfor %}
 
         <div class="activity-meta" style="margin: 15px 0 15px 0;">
-            <span class="info-label">Футбольный клуб: </span> {{ club_fullname }}
+            <span class="info-label">Заявитель: </span> {{ club_fullname }}
         </div>
 
         <div class="activity-meta">
@@ -233,12 +233,12 @@
 
         <div class="signature-section">
 <!--            <div class="signature-line">{{ control_position }} &nbsp;&nbsp;&nbsp;_________________ &nbsp;&nbsp;&nbsp;{{ control_name }}</div>-->
-            <div class="signature-line">Председатель КЛФК &nbsp;&nbsp;&nbsp;_________________ &nbsp;&nbsp;&nbsp; А. Гусаров</div>
+            <div class="signature-line">{{ director_position }} &nbsp;&nbsp;&nbsp;_________________ &nbsp;&nbsp;&nbsp; {{ director_name }}</div>
         </div>
         
         <div class="signature-section">
 <!--            <div class="signature-line">Секретарь &nbsp;&nbsp;&nbsp;_________________ &nbsp;&nbsp;&nbsp;{{ secretary_name }}</div>-->
-            <div class="signature-line">Секретарь &nbsp;&nbsp;&nbsp;_________________ &nbsp;&nbsp;&nbsp;С. Жугралин</div>
+            <div class="signature-line">{{ secretary_position }} &nbsp;&nbsp;&nbsp;_________________ &nbsp;&nbsp;&nbsp;{{ secretary_name }}</div>
         </div>
 
 <!--        <p>-->

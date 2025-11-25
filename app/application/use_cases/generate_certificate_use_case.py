@@ -78,6 +78,8 @@ class GenerateCertificateUseCase:
 
         # Формируем DTO
         certificate_data = CertificateDataDTO(
+            type_en=certificate.type_ru if certificate.type_ru else "to participate in UEFA club tournaments",
+            type_kk=certificate.type_kk if certificate.type_kk else "«Қазақстан Футбол федерациясы» Қауымдастығы <br> ЗТБ-мен ұйымдастырылатын жарыстарына қатысу үшін",
             club_full_name_kk=club.full_name_kk if club.full_name_kk else "",
             club_full_name_en=club.full_name_en if club.full_name_en else "",
             club_bin=club.bin if club.bin else "",

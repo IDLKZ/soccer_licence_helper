@@ -324,7 +324,7 @@ class GenerateReportUseCaseV2:
 
         # В БД хранится имя в текстовом поле
         user_full_name = criteria.checked_by
-
+        print(f"user_full_name: {user_full_name}")
         # Используем маппер для определения должности
         position = self.expert_mapper.get_position(
             category_value=category.value,

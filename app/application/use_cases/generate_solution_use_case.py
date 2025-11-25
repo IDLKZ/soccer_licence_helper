@@ -6,7 +6,8 @@ from typing import List, Dict
 from sqlalchemy import select, and_
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
-
+import json
+from datetime import datetime
 from app.infrastructure.database.models.application_solution import ApplicationSolutionModel
 from app.infrastructure.database.models.application_criteria import ApplicationCriteriaModel
 from app.infrastructure.database.models.application_document import ApplicationDocumentModel
@@ -102,9 +103,11 @@ class GenerateSolutionUseCase:
 
         # Строим данные
         experts = await self.build_experts(application_documents, application.id)
-        criteria = await self.build_criteria(application_documents, application.id, application_status_id)
-        articles = await self.build_articles(application_documents, application.id, application_status_id)
+        criteria = await self.build_criteria(application_documents, application.id)
+        articles = await self.build_articles(application_documents, application.id)
+
         conclusion = self.build_conclusion(
+            solution=solution,
             articles=articles,
             club=club.full_name_ru,
             season=season.title_ru,
@@ -115,6 +118,9 @@ class GenerateSolutionUseCase:
 
         # Формируем DTO
         solution_data = SolutionDataDTO(
+            director_name=solution.director_name if solution.director_name else "А. Гусаров",
+            director_position=solution.director_position if solution.director_position else "Председатель КЛФК",
+            type=solution.type if solution.type else "КФФ",
             meeting_date=(
                 solution.meeting_date.strftime("%d/%m/%Y")
                 if solution.meeting_date
@@ -147,7 +153,8 @@ class GenerateSolutionUseCase:
             season=season.title_ru,
             criteria=criteria,
             documents=articles,
-            secretary_name=solution.secretary_name if solution.secretary_name else "Н.Еламанов",
+            secretary_name=solution.secretary_name if solution.secretary_name else "С. Жугралин",
+            secretary_position=solution.secretary_position if solution.secretary_position else "Секретарь",
             summary=summary,
             conclusion=conclusion,
             logo_base64=logo_base64
@@ -205,7 +212,7 @@ class GenerateSolutionUseCase:
                     ApplicationDocumentModel.application_id == application_id
                 )
             )
-            .options(selectinload(ApplicationDocumentModel.category))
+            .options(selectinload(ApplicationDocumentModel.category), selectinload(ApplicationDocumentModel.document))
         )
 
         result = await self.db.execute(query)
@@ -241,8 +248,7 @@ class GenerateSolutionUseCase:
     async def build_criteria(
         self,
         application_documents: List[ApplicationDocumentModel],
-        application_id: int,
-        application_status_id: int
+        application_id: int
     ) -> List[SolutionCriteriaDTO]:
         """
         Построить список критериев (выполненность требований по категориям)
@@ -265,7 +271,7 @@ class GenerateSolutionUseCase:
 
             # Считаем, что control_comment => требование не выполнено
             if doc.is_final_passed is None:
-                group["failed_titles"].append(doc.title or "Документ")
+                group["failed_titles"].append(doc.document.title_ru or "Документ")
 
         # Финальная сборка
         result = []
@@ -292,8 +298,7 @@ class GenerateSolutionUseCase:
     async def build_articles(
         self,
         application_documents: List[ApplicationDocumentModel],
-        application_id: int,
-        application_status_id: int
+        application_id: int
     ) -> List[SolutionArticleDTO]:
         """
         Построить список статей с невыполненными требованиями
@@ -324,7 +329,7 @@ class GenerateSolutionUseCase:
 
                 group["failed_docs"].append(
                     SolutionDocItemDTO(
-                        title=doc.title or "Документ",
+                        title=doc.document.title_ru or "Документ",
                         comment=doc.control_comment if doc.control_comment else doc.industry_comment,
                         deadline=deadline_str
                     )
@@ -377,6 +382,7 @@ class GenerateSolutionUseCase:
 
     def build_conclusion(
         self,
+        solution: ApplicationSolutionModel,
         articles: List[SolutionArticleDTO],
         club: str,
         license: str,
@@ -394,38 +400,75 @@ class GenerateSolutionUseCase:
 
         if application_status_id == APPLICATION_STATUS_REVOKED_ID:
             return {
-                1: f"Отозвать лицензию у «{club}», организованного КФФ в сезоне «{season}» года.",
-                1: f"«{club}» отказать в выдаче Лицензии на право участия в турнирах, организуемых КФФ в сезоне «{season}» г.г.",
-                2: f"Настоящее решение может быть обжаловано в Апелляционной комиссии по лицензированию футбольных клубов в порядке, определенном «Правилами по лицензированию футбольных клубов РК для участия в соревнованиях, организуемых КФФ»."
+                # 1: f"Отозвать лицензию у «{club}», организованного КФФ в сезоне «{season}» года.",
+                1: f"«{club}» отказать в выдаче Лицензии на право участия в турнирах, организуемых {solution.type if solution else 'КФФ'} в сезоне «{season}» г.г.",
+                2: f"Настоящее решение может быть обжаловано в Апелляционной комиссии по лицензированию футбольных клубов в порядке, определенном «Правилами по лицензированию футбольных клубов РК для участия в соревнованиях, организуемых {solution.type if solution else 'КФФ'}»."
             }
 
         if not articles:
             # Случай 1 — нет нарушений
             return {
-                1: f"Выдать «{club}» Лицензию «{license}», организуемый КФФ в сезоне «{season}» года.",
-                2: f"Настоящее решение может быть обжаловано в Апелляционной комиссии по лицензированию футбольных клубов в порядке, определенном «Правилами по лицензированию футбольных клубов РК для участия в соревнованиях, организуемых КФФ»."
+                1: f"Выдать «{club}» Лицензию «{license}», организуемый {solution.type if solution else 'КФФ'} в сезоне «{season}» года.",
+                2: f"Настоящее решение может быть обжаловано в Апелляционной комиссии по лицензированию футбольных клубов в порядке, определенном «Правилами по лицензированию футбольных клубов РК для участия в соревнованиях, организуемых {solution.type if solution else 'КФФ'}»."
             }
 
         # Случай 2 — есть нарушения
         sections = ", ".join(article.title for article in articles)
-
+        sanctions_block = self.build_sanctions_text(solution.list_criteria)
         return {
-            1: (
-                f"Согласно Приложению III Правил по лицензированию:<br>"
-                f"- за невыполнение требований по разделам «{sections}» применить санкцию <b>«Замечание»</b>."
-            ),
-            2: (
-                f"Выдать «{club}» Лицензию «{license}», организуемый КФФ в сезоне «{season}» года."
-            ),
+            1: (f"Согласно Приложению III Правил по лицензированию:<br>"),
+            2: sanctions_block,
             3: (
+                f"Выдать «{club}» Лицензию «{license}», организуемый {solution.type if solution else 'КФФ'} в сезоне «{season}» года."
+            ),
+            4: (
                 "В случае невыполнения решения в установленный срок, "
                 "Комиссией по лицензированию будут приняты <b>дополнительные дисциплинарные санкции "
                 "(штраф, снятие турнирных очков, отзыв Лицензии)</b> в соответствии Приложением III Правил по лицензированию."
             ),
-            4: (
-                "Настоящее решение может быть обжаловано в Апелляционной комиссии по лицензированию футбольных клубов в порядке, определенном «Правилами по лицензированию футбольных клубов РК для участия в соревнованиях, организуемых КФФ»."
+            5: (
+                f"Настоящее решение может быть обжаловано в Апелляционной комиссии по лицензированию футбольных клубов в порядке, определенном «Правилами по лицензированию футбольных клубов РК для участия в соревнованиях, организуемых {solution.type if solution else 'КФФ'}»."
             )
         }
+
+        # return {
+        #     1: (
+        #         f"Согласно Приложению III Правил по лицензированию:<br>"
+        #         f"- за невыполнение требований по разделам «{sections}» применить санкцию <b>«Замечание»</b>."
+        #     ),
+        #     2: (
+        #         f"Выдать «{club}» Лицензию «{license}», организуемый {solution.type if solution else 'КФФ'} в сезоне «{season}» года."
+        #     ),
+        #     3: (
+        #         "В случае невыполнения решения в установленный срок, "
+        #         "Комиссией по лицензированию будут приняты <b>дополнительные дисциплинарные санкции "
+        #         "(штраф, снятие турнирных очков, отзыв Лицензии)</b> в соответствии Приложением III Правил по лицензированию."
+        #     ),
+        #     4: (
+        #         f"Настоящее решение может быть обжаловано в Апелляционной комиссии по лицензированию футбольных клубов в порядке, определенном «Правилами по лицензированию футбольных клубов РК для участия в соревнованиях, организуемых {solution.type if solution else 'КФФ'}»."
+        #     )
+        # }
+
+    def parse_date(self, date_str):
+        for fmt in ("%d.%m.%Y", "%Y-%m-%d"):
+            try:
+                return datetime.strptime(date_str, fmt)
+            except ValueError:
+                pass
+        raise ValueError(f"Unknown date format: {date_str}")
+
+    def build_sanctions_text(self, items):
+        lines = []
+        for item in items:
+            deadline = self.parse_date(item["deadline"])
+            line = (
+                f"- за невыполнение требований по разделу «{item['title']}» "
+                f"применить санкцию <b>«{item['type']}»</b>. "
+                f"<b>Устранить несоответствие в срок до {deadline.strftime('%d.%m.%Y')} г.</b>;<br>"
+            )
+            lines.append(line)
+
+        return "".join(lines)
 
     async def _get_criteria_for_category(
         self,

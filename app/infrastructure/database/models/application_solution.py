@@ -25,10 +25,15 @@ class ApplicationSolutionModel(Base, TimestampMixin):
         nullable=True
     )
     secretary_name: Mapped[str | None] = mapped_column(Text, nullable=True)
+    secretary_position: Mapped[str | None] = mapped_column(Text, nullable=True)
     meeting_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     meeting_place: Mapped[str | None] = mapped_column(Text, nullable=True)
     department_name: Mapped[str | None] = mapped_column(Text, nullable=True)
+    director_position: Mapped[str | None] = mapped_column(Text, nullable=True)
+    director_name: Mapped[str | None] = mapped_column(Text, nullable=True)
+    type: Mapped[str | None] = mapped_column(String(255), nullable=True)
     list_documents: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    list_criteria: Mapped[list | None] = mapped_column(JSON, nullable=True)
 
     # Relationships
     application: Mapped["ApplicationModel"] = relationship(
