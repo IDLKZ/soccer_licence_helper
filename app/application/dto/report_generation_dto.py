@@ -95,12 +95,13 @@ class CategoryExpertMapping:
         Returns:
             Строка с должностью эксперта
         """
+        print(f"category_value: {category_value}")
         mapping = {
-            "legal-documents": f"{self.legal_documents} - {user_full_name}",
-            "financial-documents": f"{self.financial_documents} - {user_full_name}",
-            "sport-documents": f"{self.sport_documents} - {user_full_name}",  # Без имени для спортивных
+            "pravovye-kriterii": f"{self.legal_documents} - {user_full_name}",
+            "finansovye-kriterii": f"{self.financial_documents} - {user_full_name}",
+            "sportivnye-kriterii": f"{self.sport_documents} - {user_full_name}",  # Без имени для спортивных
             "infrastrukturnye-kriterii": f"{self.infrastructure_documents} - {user_full_name}",
-            "kriteriy-socialnoy-i-ekologicheskoy-otvetstvennosti": f"{self.social_documents} - {user_full_name}",
-            "kadrovye-i-administrativnye-kriterii": f"{self.hr_documents} - {user_full_name}",
+            "kriteriy-socialnoy-i-ekologicheskoy-ustoychivosti": f"{self.social_documents} - {user_full_name}",
+            "hr-documents": f"{self.hr_documents} - {user_full_name}",
         }
         return mapping.get(category_value, category_title_ru)
