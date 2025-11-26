@@ -3,6 +3,7 @@ Solutions Router
 Эндпоинты для работы с решениями
 """
 import tempfile
+import traceback
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import FileResponse
 
@@ -125,6 +126,7 @@ async def generate_solution(
             detail=f"Template not found: {str(e)}"
         )
     except Exception as e:
+        traceback.print_exc()
         # Другие ошибки
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

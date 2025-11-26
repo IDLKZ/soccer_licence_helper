@@ -459,14 +459,15 @@ class GenerateSolutionUseCase:
 
     def build_sanctions_text(self, items):
         lines = []
-        for item in items:
-            deadline = self.parse_date(item["deadline"])
-            line = (
-                f"- за невыполнение требований по разделу «{item['title']}» "
-                f"применить санкцию <b>«{item['type']}»</b>. "
-                f"<b>Устранить несоответствие в срок до {deadline.strftime('%d.%m.%Y')} г.</b>;<br>"
-            )
-            lines.append(line)
+        if items is not None and len(items) > 0:
+            for item in items:
+                deadline = self.parse_date(item["deadline"])
+                line = (
+                    f"- за невыполнение требований по разделу «{item['title']}» "
+                    f"применить санкцию <b>«{item['type']}»</b>. "
+                    f"<b>Устранить несоответствие в срок до {deadline.strftime('%d.%m.%Y')} г.</b>;<br>"
+                )
+                lines.append(line)
 
         return "".join(lines)
 

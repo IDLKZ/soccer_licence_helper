@@ -95,7 +95,7 @@ class CategoryExpertMapping:
         Returns:
             Строка с должностью эксперта
         """
-        print(f"category_value: {category_value}")
+        # print(f"category_value: {category_value}")
         mapping = {
             "pravovye-kriterii": f"{self.legal_documents} - {user_full_name}",
             "finansovye-kriterii": f"{self.financial_documents} - {user_full_name}",
