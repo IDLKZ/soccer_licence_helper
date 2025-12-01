@@ -97,7 +97,7 @@ class GenerateSolutionUseCase:
             f"Комиссия по лицензированию футбольных клубов (далее по тексту - КЛФК), "
             f"рассмотрев представленные Директором Департамента лицензирования "
             f"отчет и учетное дело «{club.full_name_ru}» для получения Лицензии «{license_entity.title_ru}», "
-            f"организуемый Казахстанской Федерацией футбола в сезоне "
+            f"организуемый {solution.type if solution.type else "КФФ"} в сезоне "
             f"«{season.title_ru}» года (далее по тексту - «Лицензия»)"
         )
 
@@ -371,7 +371,7 @@ class GenerateSolutionUseCase:
 
             if category_key not in grouped:
                 # Используем маппер для определения должности эксперта
-                position = self.expert_mapper.get_position(
+                position = self.expert_mapper.get_position_for_solution(
                     category_value=category.value,
                     user_full_name=criteria.checked_by,
                     category_title_ru=category.title_ru

@@ -105,3 +105,26 @@ class CategoryExpertMapping:
             "hr-documents": f"{self.hr_documents} - {user_full_name}",
         }
         return mapping.get(category_value, category_title_ru)
+
+    def get_position_for_solution(self, category_value: str, user_full_name: str, category_title_ru: str) -> str:
+        """
+        Получить должность эксперта для категории
+
+        Args:
+            category_value: Значение категории (например, "legal_documents")
+            user_full_name: ФИО пользователя
+            category_title_ru: Название категории на русском (fallback)
+
+        Returns:
+            Строка с должностью эксперта
+        """
+        # print(f"category_value: {category_value}")
+        mapping = {
+            "pravovye-kriterii": f"{self.legal_documents}",
+            "finansovye-kriterii": f"{self.financial_documents}",
+            "sportivnye-kriterii": f"{self.sport_documents}",
+            "infrastrukturnye-kriterii": f"{self.infrastructure_documents}",
+            "kriteriy-socialnoy-i-ekologicheskoy-ustoychivosti": f"{self.social_documents}",
+            "hr-documents": f"{self.hr_documents}",
+        }
+        return mapping.get(category_value, category_title_ru)
