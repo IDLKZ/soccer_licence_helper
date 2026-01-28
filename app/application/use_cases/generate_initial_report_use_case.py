@@ -147,6 +147,8 @@ class GenerateInitialReportUseCase:
                 doc.document.title_ru if doc.document else "Документ"
             )
 
+            document_title = doc.document.title_ru if doc.document else "Документ"
+
             # Дата подачи
             submission_date = doc.created_at.strftime("%d.%m.%Y") if doc.created_at else ""
 
@@ -158,7 +160,8 @@ class GenerateInitialReportUseCase:
                     number=idx,
                     name=doc_name,
                     submission_date=submission_date,
-                    notes=notes
+                    notes=notes,
+                    document_title=document_title
                 )
             )
 

@@ -15,11 +15,11 @@ from app.presentation.api.dependencies import (
     load_logo_base64,
     load_sign_img_base64
 )
-
+from collections import OrderedDict
 router = APIRouter(prefix="/initial-reports", tags=["initial-reports"])
 
-
-@router.post("/generate", response_class=FileResponse)
+# response_class=FileResponse
+@router.post("/generate")
 async def generate_initial_report(
     request: GenerateInitialReportRequest,
     use_case: GenerateInitialReportUseCaseDep,
@@ -55,22 +55,31 @@ async def generate_initial_report(
         )
 
         # Преобразуем InitialReportDataDTO в словарь для шаблона
+        docs = [
+            {
+                "number": doc.number,
+                "name": doc.name,
+                "submission_date": doc.submission_date,
+                "notes": doc.notes,
+                "document_title": doc.document_title
+            }
+            for doc in report_data.documents
+        ]
+
+        grouped = OrderedDict()
+        for d in docs:
+            title = d.get("document_title") or "Без раздела"
+            grouped.setdefault(title, []).append(d)
+
         context = {
             "expert": report_data.expert,
             "director": report_data.director,
             "date": report_data.date,
             "club": report_data.club,
-            "documents": [
-                {
-                    "number": doc.number,
-                    "name": doc.name,
-                    "submission_date": doc.submission_date,
-                    "notes": doc.notes
-                }
-                for doc in report_data.documents
-            ],
+            "documents": docs,
+            "grouped_documents": grouped,
             "logo_base64": logo_base64,
-            "sign_img": sign_img
+            "sign_img": sign_img,
         }
 
         # Рендерим HTML шаблон

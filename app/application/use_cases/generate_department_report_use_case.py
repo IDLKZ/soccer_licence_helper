@@ -3,7 +3,7 @@ Generate Department Report Use Case
 Use Case для генерации отчета департамента
 """
 from typing import List, Dict
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, desc
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -75,22 +75,21 @@ class GenerateDepartmentReportUseCase:
 
         return department_report_data
 
-    async def _get_report_with_relations(self, report_id: int) -> ApplicationReportModel:
-        """Получить отчет со всеми связями"""
+    async def _get_report_with_relations(self, report_id: int) -> ApplicationReportModel | None:
         query = (
             select(ApplicationReportModel)
             .where(ApplicationReportModel.id == report_id)
+            .order_by(desc(ApplicationReportModel.id))
+            .limit(1)
             .options(
-                selectinload(ApplicationReportModel.application)
-            )
-            .options(
+                selectinload(ApplicationReportModel.application),
                 selectinload(ApplicationReportModel.criteria)
-                .selectinload(ApplicationCriteriaModel.category)
+                .selectinload(ApplicationCriteriaModel.category),
             )
         )
 
         result = await self.db.execute(query)
-        return result.scalar_one_or_none()
+        return result.scalars().first()
 
     async def _get_club(self, application_id: int) -> ClubModel:
         """Получить клуб по application_id"""

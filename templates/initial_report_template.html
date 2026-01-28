@@ -135,29 +135,40 @@
     </table>
 
     <!-- Вторая таблица: Документы на рассмотрение -->
-    <table style="margin-top: 30px;">
-        <thead>
+    <table style="margin-top: 30px; width: 100%;">
+    <thead>
+        <tr>
+            <th colspan="4" style="text-align: center;"><strong>ДОКУМЕНТЫ НА РАССМОТРЕНИЕ</strong></th>
+        </tr>
+        <tr>
+            <th style="width: 7%;"><strong>№</strong></th>
+            <th style="width: 47%; text-align: center"><strong>НАИМЕНОВАНИЕ ДОКУМЕНТА</strong></th>
+            <th style="width: 22%; text-align: center"><strong>ДАТА ПОДАЧИ ДОКУМЕНТА</strong></th>
+            <th style="width: 24%; text-align: center"><strong>ПРИМЕЧАНИЯ</strong></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% set ns = namespace(counter=1) %}
+        {% for document_title, docs in grouped_documents.items() %}
             <tr>
-                <th colspan="4" style="text-align: center;"><strong>ДОКУМЕНТЫ НА РАССМОТРЕНИЕ</strong></th>
+                <td colspan="4" style="background: #f2f2f2;">
+                    <strong>{{ document_title }}</strong>
+                </td>
             </tr>
-            <tr>
-                <th style="width: 7%;"><strong>№</strong></th>
-                <th style="width: 47%; text-align: center"><strong>НАИМЕНОВАНИЕ ДОКУМЕНТА</strong></th>
-                <th style="width: 22%; text-align: center"><strong>ДАТА ПОДАЧИ ДОКУМЕНТА</strong></th>
-                <th style="width: 24%; text-align: center"><strong>ПРИМЕЧАНИЯ</strong></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for doc in documents %}
-            <tr>
-                <td style="text-align: center;">{{ doc.number }}</td>
-                <td>{{ doc.name }}</td>
-                <td style="text-align: center;">{{ doc.submission_date }}</td>
-                <td>{{ doc.notes }}</td>
-            </tr>
+
+            {% for doc in docs %}
+                <tr>
+                    <td style="text-align: center;">{{ ns.counter }}</td>
+                    <td>{{ doc.name }}</td>
+                    <td style="text-align: center;">{{ doc.submission_date }}</td>
+                    <td>{{ doc.notes }}</td>
+                </tr>
+                {% set ns.counter = ns.counter + 1 %}
             {% endfor %}
-        </tbody>
-    </table>
+        {% endfor %}
+    </tbody>
+</table>
+
 
 
         <div class="signature-section">

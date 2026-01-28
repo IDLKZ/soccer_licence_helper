@@ -13,6 +13,7 @@ class InitialReportDocumentDTO:
     name: str
     submission_date: str
     notes: str
+    document_title: str
 
 
 @dataclass
@@ -23,4 +24,4 @@ class InitialReportDataDTO:
     date: str  # Дата отчета
     club: str  # Заявитель
     documents: List[InitialReportDocumentDTO]  # Список документов
-    sign_img: str # Подпись
+    sign_img: str  # Подпись
