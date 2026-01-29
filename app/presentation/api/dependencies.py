@@ -2,6 +2,7 @@
 FastAPI Dependencies
 Зависимости для инжекции в эндпоинты
 """
+from dotenv import load_dotenv
 import os
 import base64
 from typing import Annotated
@@ -22,7 +23,7 @@ from app.infrastructure.services.puppeteer_pdf_generator import PuppeteerPdfGene
 
 # Database dependency
 DatabaseSession = Annotated[AsyncSession, Depends(get_db)]
-
+load_dotenv()
 
 # Template renderer dependency
 def get_template_renderer() -> ITemplateRenderer:
@@ -40,7 +41,8 @@ TemplateRenderer = Annotated[ITemplateRenderer, Depends(get_template_renderer)]
 def get_pdf_generator() -> IPDFGenerator:
     """Получить сервис генерации PDF"""
     # return PdfKitGenerator()
-    return PuppeteerPdfGenerator(service_url=os.getenv("PUPPETEER_PDF_URL", "http://localhost:3001/render"))
+    print(os.getenv("PUPPETEER_PDF_URL"))
+    return PuppeteerPdfGenerator(service_url=os.getenv("PUPPETEER_PDF_URL"))
 
 
 PDFGenerator = Annotated[IPDFGenerator, Depends(get_pdf_generator)]

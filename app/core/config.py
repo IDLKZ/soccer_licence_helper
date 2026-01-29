@@ -36,6 +36,8 @@ class Settings(BaseSettings):
     # Logging
     LOG_LEVEL: str = "INFO"
 
+    PUPPETEER_PDF_URL: str = "http://localhost:3002/render"
+
     @property
     def database_url(self) -> str:
         """Получить URL подключения к БД"""

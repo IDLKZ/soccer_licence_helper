@@ -5,7 +5,7 @@ from app.domain.services.pdf_generator import IPDFGenerator
 
 
 class PuppeteerPdfGenerator(IPDFGenerator):
-    def __init__(self, service_url: str = "http://localhost:3001/render", timeout: int = 90):
+    def __init__(self, service_url: str, timeout: int = 90):
         self.service_url = service_url
         self.timeout = timeout
 
