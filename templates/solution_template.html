@@ -24,19 +24,15 @@
         }
 
         .logo {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            font-weight: bold;
-            text-align: center;
-            position: absolute;
-            top: 0;
-            right: 0;
+          width: 80px;
+          height: 80px;
+          object-fit: contain;
+          border-radius: 50%;
+          background: white;
+          position: absolute;
+          top: 0;
+          right: 0;
+          display: block;
         }
 
         h1 {
@@ -114,7 +110,7 @@
         .signature-line {
             font-weight: bold;
         }
- .w-80 {
+        .w-80 {
             width: 80px;
         }
         .w-250 {
@@ -141,11 +137,82 @@
         .dvh-20 {
             margin: 20px 0;
         }
+        .signature-wrapper {
+          margin-top: 40px;
+          page-break-inside: avoid;
+        }
+
+        .signature-row {
+          display: flex;
+          align-items: flex-end;
+          gap: 16px;
+          font-weight: bold;
+        }
+
+        .signature-label {
+          white-space: nowrap;
+        }
+
+        .signature-field {
+          position: relative;
+          display: inline-block;
+          min-width: 260px;
+          text-align: center;
+        }
+
+        .signature-line {
+          display: block;
+          letter-spacing: 2px;
+        }
+
+        .signature-image {
+          position: absolute;
+          bottom: 18px;
+          left: 50%;
+          transform: translateX(-50%);
+        }
+
+        .signature-image img {
+          height: 52px;
+          max-width: 220px;
+          display: block;
+        }
+
+        .signature-name {
+          white-space: nowrap;
+        }
+
+        .bullet-item { break-inside: avoid; }
+
         @media print {
             body {
                 margin: 20px;
             }
         }
+
+        @media print {
+          body { margin: 20px; }
+
+          thead { display: table-header-group; }
+          tfoot { display: table-footer-group; }
+
+          table { break-inside: auto; page-break-inside: auto; }
+          tr, td, th { break-inside: avoid; page-break-inside: avoid; }
+
+          /* блоки — не рвать посередине */
+          .header,
+          .info-section,
+          .activity-meta,
+          .section-title,
+          .signature-wrapper,
+          .signature-row {
+            break-inside: avoid;
+            page-break-inside: avoid;
+          }
+        }
+
+        /* чтобы длинные слова/ссылки не ломали ширину */
+        p { word-break: break-word; }
     </style>
 </head>
 <body>
@@ -213,7 +280,7 @@
                 <div class="activity-meta" style="margin-left: 0px;">
                     <p>{{ document.letter }} несоответствия по разделу <b><u>«{{ document.title }}»</u>:</b></p>
                     {% for doc in document.docs %}
-                        <p style="margin-left: 20px;">• <b>{{ doc.title }}</b>.</p>
+                        <p class="bullet-item" style="margin-left: 20px;">• <b>{{ doc.title }}</b>.</p>
 <!--                        <p style="text-indent: 20px;">{{ doc.comment }}. <b><i>{{ doc.deadline }}</i></b></p>-->
                         <p style="text-indent: 20px;">{{ doc.comment }}</p>
                     {% endfor %}
@@ -231,14 +298,39 @@
             {% endfor %}
         </div>
 
-        <div class="signature-section">
-<!--            <div class="signature-line">{{ control_position }} &nbsp;&nbsp;&nbsp;_________________ &nbsp;&nbsp;&nbsp;{{ control_name }}</div>-->
-            <div class="signature-line">Подписано {{ director_position }} {{ director_name }}</div>
+        <div class="signature-wrapper">
+          <div class="signature-row">
+            <span class="signature-label">{{ director_position }}</span>
+
+            <span class="signature-field">
+              {# Если появится подпись картинкой — раскомментируешь и передашь base64 #}
+              {#
+              <span class="signature-image">
+                <img src="data:image/png;base64,{{ director_sign_img }}" alt="Подпись">
+              </span>
+              #}
+              <span class="signature-line">_________________</span>
+            </span>
+
+            <span class="signature-name">{{ director_name }}</span>
+          </div>
         </div>
-        
-        <div class="signature-section">
-<!--            <div class="signature-line">Секретарь &nbsp;&nbsp;&nbsp;_________________ &nbsp;&nbsp;&nbsp;{{ secretary_name }}</div>-->
-            <div class="signature-line">Подписано {{ secretary_position }} {{ secretary_name }}</div>
+
+        <div class="signature-wrapper">
+          <div class="signature-row">
+            <span class="signature-label">{{ secretary_position }}</span>
+
+            <span class="signature-field">
+              {#
+              <span class="signature-image">
+                <img src="data:image/png;base64,{{ secretary_sign_img }}" alt="Подпись">
+              </span>
+              #}
+              <span class="signature-line">_________________</span>
+            </span>
+
+            <span class="signature-name">{{ secretary_name }}</span>
+          </div>
         </div>
 
 <!--        <p>-->
