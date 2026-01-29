@@ -18,7 +18,7 @@ from app.domain.services.template_renderer import ITemplateRenderer
 from app.domain.services.pdf_generator import IPDFGenerator
 from app.infrastructure.services.jinja2_template_renderer import Jinja2TemplateRenderer
 from app.infrastructure.services.pdfkit_generator import PdfKitGenerator
-
+from app.infrastructure.services.puppeteer_pdf_generator import PuppeteerPdfGenerator
 
 # Database dependency
 DatabaseSession = Annotated[AsyncSession, Depends(get_db)]
@@ -39,7 +39,8 @@ TemplateRenderer = Annotated[ITemplateRenderer, Depends(get_template_renderer)]
 # PDF generator dependency
 def get_pdf_generator() -> IPDFGenerator:
     """Получить сервис генерации PDF"""
-    return PdfKitGenerator()
+    # return PdfKitGenerator()
+    return PuppeteerPdfGenerator(service_url=os.getenv("PUPPETEER_PDF_URL", "http://localhost:3001/render"))
 
 
 PDFGenerator = Annotated[IPDFGenerator, Depends(get_pdf_generator)]

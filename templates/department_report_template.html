@@ -26,31 +26,53 @@
         .logo {
             width: 80px;
             height: 80px;
+            object-fit: contain;
             border-radius: 50%;
             background: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            font-weight: bold;
-            text-align: center;
             position: absolute;
             top: 0;
             right: 0;
         }
-        .sign {
-            width: 120px;
-            height: 80px;
+        .signature-wrapper {
+            margin-top: 60px;
+            page-break-inside: avoid;
+        }
+
+        .signature-row {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
+            align-items: flex-end;
+            gap: 16px;
             font-weight: bold;
+        }
+
+        .signature-label {
+            white-space: nowrap;
+        }
+
+        .signature-field {
+            position: relative;
+            display: inline-block;
+            min-width: 260px;
             text-align: center;
+        }
+
+        .signature-line {
+            display: block;
+            letter-spacing: 2px;
+        }
+
+        .signature-image {
             position: absolute;
-            top: -12mm;
-            right: 80mm;
-          }
+            bottom: 8px;        /* высота над линией */
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .signature-image img {
+            height: 56px;        /* можно менять */
+            max-width: 230px;
+            display: block;
+        }
         h1 {
             text-align: center;
             font-size: 16px;
@@ -118,12 +140,6 @@
             line-height: 1.4;
         }
 
-        .signature-section {
-            position: relative;
-            margin-top: 40px;
-            text-align: left;
-        }
-
         .signature-line {
             font-weight: bold;
         }
@@ -159,6 +175,28 @@
                 margin: 20px;
             }
         }
+        @media print {
+            thead { display: table-header-group; }
+            tfoot { display: table-footer-group; }
+
+            table { break-inside: auto; page-break-inside: auto; }
+            tr, td, th { break-inside: avoid; page-break-inside: avoid; }
+
+            .activity-item,
+            .info-section,
+            .header,
+            .signature-wrapper,
+            .signature-row {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+        }
+
+        /* Чтобы заголовок + логотип не “рассыпались” */
+        .header { break-inside: avoid; }
+
+        /* Картинки не должны быть flex */
+        .logo, .sign { display: block; }
     </style>
 </head>
 <body>
@@ -210,10 +248,18 @@
             {% endfor %}
         </div>
         {% endfor %}
-        <div class="signature-section">
-            <div class="signature-line">Директор Департамента лицензирования &nbsp;&nbsp;&nbsp;_________________ &nbsp;&nbsp;&nbsp;</div>
-            <img class="sign" src="data:image/png;base64,{{ sign_img }}" alt="Sign">
-        </div>
+        <div class="signature-wrapper">
+            <div class="signature-row">
+              <span class="signature-label">Директор Департамента лицензирования</span>
+          
+              <span class="signature-field">
+                <span class="signature-image">
+                  <img src="data:image/png;base64,{{ sign_img }}" alt="Подпись">
+                </span>
+                <span class="signature-line">_________________</span>
+              </span>
+            </div>
+          </div>
     </div>
 </body>
 </html>
