@@ -113,11 +113,12 @@
 
         .activity-meta {
             margin-bottom: 8px;
+            break-after: avoid;
+            page-break-after: avoid;
         }
 
         .activity-meta p {
-            margin: 3px 0;
-            line-height: 1.4;
+            margin: 2px 0;
         }
 
         .activity-label {
@@ -130,14 +131,15 @@
         }
 
         .results-text {
-            margin: 8px 0;
-            line-height: 1.4;
+            margin: 6px 0;
         }
 
         .criteria-item {
             margin: 3px 0;
             font-style: italic;
             line-height: 1.4;
+            break-inside: auto;
+            page-break-inside: auto;
         }
 
         .signature-line {
@@ -182,7 +184,7 @@
             table { break-inside: auto; page-break-inside: auto; }
             tr, td, th { break-inside: avoid; page-break-inside: avoid; }
 
-            .activity-item,
+            .activity-meta,
             .info-section,
             .header,
             .signature-wrapper,
@@ -238,15 +240,15 @@
 
         {% for report in reports %}
             <div class="activity-item">
-            <div class="activity-meta">
-                <p><span class="activity-label">Дата:</span> <span class="activity-value">{{ report.date }}</span></p>
-                <p><span class="activity-label">Исполнитель:</span> <span class="activity-value">{{ report.expert }}</span></p>
-                <p class="results-text"><span class="activity-label">Результаты:</span> в результате проведенного анализа документов, подтверждающих выполнение требований правовых критериев, согласно Правил, <strong>установлено следующее:</strong></p>
+                <div class="activity-meta">
+                    <p><span class="activity-label">Дата:</span> <span class="activity-value">{{ report.date }}</span></p>
+                    <p><span class="activity-label">Исполнитель:</span> <span class="activity-value">{{ report.expert }}</span></p>
+                    <p class="results-text"><span class="activity-label">Результаты:</span> в результате проведенного анализа документов, подтверждающих выполнение требований правовых критериев, согласно Правил, <strong>установлено следующее:</strong></p>
+                </div>
+                {% for document in report.documents %}
+                    <div class="criteria-item"><em>{{ document.values()|first }}</em></div>
+                {% endfor %}
             </div>
-            {% for document in report.documents %}
-                <div class="criteria-item"><em>{{ document.values()|first }}</em></div>
-            {% endfor %}
-        </div>
         {% endfor %}
         <div class="signature-wrapper">
             <div class="signature-row">
